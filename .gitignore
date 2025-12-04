@@ -1,0 +1,40 @@
+# Binaries
+google-chat-mcp
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Local bin directory (contains credentials)
+bin/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+*.env.local
+
+# Credentials
+credentials.json
+token.json
+service-account.json
+*.pem
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
