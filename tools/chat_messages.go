@@ -87,7 +87,9 @@ func listMessagesHandler(ctx context.Context, request mcp.CallToolRequest, input
 		pageSize = 25
 	}
 
-	call := service.Spaces.Messages.List(input.SpaceName).PageSize(int64(pageSize))
+	call := service.Spaces.Messages.List(input.SpaceName).
+		PageSize(int64(pageSize)).
+		OrderBy("createTime desc")
 	if input.PageToken != "" {
 		call = call.PageToken(input.PageToken)
 	}
@@ -229,8 +231,17 @@ func formatMessage(msg *chat.Message) string {
 	}
 	sb.WriteString(fmt.Sprintf("Text: %s\n", msg.Text))
 	sb.WriteString(fmt.Sprintf("Created: %s\n", msg.CreateTime))
+	if msg.LastUpdateTime != "" && msg.LastUpdateTime != msg.CreateTime {
+		sb.WriteString(fmt.Sprintf("Edited: %s\n", msg.LastUpdateTime))
+	}
 	if msg.Thread != nil && msg.Thread.Name != "" {
 		sb.WriteString(fmt.Sprintf("Thread: %s\n", msg.Thread.Name))
+	}
+	if len(msg.Attachment) > 0 {
+		sb.WriteString(fmt.Sprintf("Attachments: %d\n", len(msg.Attachment)))
+		for _, att := range msg.Attachment {
+			sb.WriteString(fmt.Sprintf("  - %s (%s)\n", att.Name, att.ContentType))
+		}
 	}
 	return sb.String()
 }
