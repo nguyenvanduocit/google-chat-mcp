@@ -7,47 +7,67 @@ A Model Context Protocol (MCP) server for Google Chat, enabling AI assistants to
 - **Spaces**: List and get details of Google Chat spaces
 - **Messages**: List, get, send, and delete messages
 - **Members**: List and get members of spaces
+- **Attachments**: Upload file attachments to messages
 
 ## Prerequisites
 
 1. A Google Cloud project with the Google Chat API enabled
-2. A service account with the necessary permissions
-3. Service account JSON key file
+2. OAuth 2.0 Client ID credentials (Desktop app type)
 
 ## Setup
 
-### 1. Create a Service Account
+### 1. Create OAuth 2.0 Credentials
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
 3. Enable the **Google Chat API**
-4. Go to **IAM & Admin** > **Service Accounts**
-5. Create a new service account
-6. Grant the service account the necessary roles for Google Chat
-7. Create and download a JSON key file
+4. Go to **APIs & Services** > **Credentials**
+5. Click **Create Credentials** > **OAuth client ID**
+6. Select **Desktop app** as the application type
+7. Download the JSON file and save it as `google-credentials.json`
 
-### 2. Configure the Service Account for Google Chat
+### 2. Generate OAuth Token
 
-For the Chat API to work with a service account, you need to:
+Use the included token generation tool:
 
-1. Set up domain-wide delegation for the service account
-2. Or add the service account as a member to Chat spaces
+```bash
+# Build the token generator
+go build -o get-google-token ./scripts/get-google-token
+
+# Run it with your credentials file
+./get-google-token \
+  -credentials /path/to/google-credentials.json \
+  -token /path/to/google-token.json
+```
+
+This will:
+1. Open your browser for Google authentication
+2. Ask you to authorize the required Chat API scopes
+3. Save the OAuth token to the specified path
 
 ### 3. Set Environment Variables
 
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+export GOOGLE_CREDENTIALS_FILE=/path/to/google-credentials.json
+export GOOGLE_TOKEN_FILE=/path/to/google-token.json
 ```
 
 Or create a `.env` file:
 
 ```
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+GOOGLE_CREDENTIALS_FILE=/path/to/google-credentials.json
+GOOGLE_TOKEN_FILE=/path/to/google-token.json
 ```
 
 ## Usage
 
-### Build
+### Install
+
+```bash
+go install github.com/nguyenvanduocit/google-chat-mcp@latest
+```
+
+### Build from source
 
 ```bash
 go build -o google-chat-mcp .
@@ -56,19 +76,13 @@ go build -o google-chat-mcp .
 ### Run (STDIO mode)
 
 ```bash
-./google-chat-mcp
+./google-chat-mcp --env .env
 ```
 
 ### Run (HTTP mode)
 
 ```bash
-./google-chat-mcp --http_port 3003
-```
-
-### Run with env file
-
-```bash
-./google-chat-mcp --env .env
+./google-chat-mcp --env .env --http_port 3003
 ```
 
 ## MCP Configuration
@@ -111,6 +125,7 @@ Add to your MCP settings:
 - `google_chat_get_message` - Get a specific message
 - `google_chat_send_message` - Send a message to a space
 - `google_chat_delete_message` - Delete a message
+- `google_chat_upload_attachment` - Upload a file attachment to a space
 
 ### Members
 
