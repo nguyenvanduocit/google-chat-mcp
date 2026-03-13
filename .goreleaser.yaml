@@ -1,8 +1,24 @@
 version: 2
 
 builds:
-  - main: .
+  - id: google-chat-mcp
+    main: .
     binary: google-chat-mcp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+
+  - id: google-chat-cli
+    main: ./cmd/google-chat-cli
+    binary: google-chat-cli
     env:
       - CGO_ENABLED=0
     goos:
@@ -26,6 +42,31 @@ archives:
 
 checksum:
   name_template: "checksums.txt"
+
+brews:
+  - name: google-chat-mcp
+    ids:
+      - google-chat-mcp
+    repository:
+      owner: nguyenvanduocit
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/nguyenvanduocit/google-chat-mcp"
+    description: "google-chat-mcp - MCP server"
+    install: |
+      bin.install "google-chat-mcp"
+
+  - name: google-chat-cli
+    ids:
+      - google-chat-cli
+    repository:
+      owner: nguyenvanduocit
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/nguyenvanduocit/google-chat-mcp"
+    description: "google-chat-cli - CLI tool"
+    install: |
+      bin.install "google-chat-cli"
 
 changelog:
   sort: asc
