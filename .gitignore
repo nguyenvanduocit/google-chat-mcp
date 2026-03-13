@@ -38,3 +38,5 @@ service-account.json
 # OS files
 .DS_Store
 Thumbs.db
+cli
+dist
