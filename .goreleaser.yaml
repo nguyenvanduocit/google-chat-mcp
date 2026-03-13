@@ -32,7 +32,21 @@ builds:
       - -s -w
 
 archives:
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - id: google-chat-mcp
+    ids:
+      - google-chat-mcp
+    name_template: "google-chat-mcp_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+  - id: google-chat-cli
+    ids:
+      - google-chat-cli
+    name_template: "google-chat-cli_{{ .Os }}_{{ .Arch }}"
     formats:
       - tar.gz
     format_overrides:
