@@ -141,7 +141,7 @@ In addition to the MCP server, `google-chat-mcp` ships a standalone CLI binary (
 ```bash
 just install-cli
 # or
-go install github.com/nguyenvanduocit/google-chat-mcp/cmd/cli@latest
+go install github.com/nguyenvanduocit/google-chat-mcp/cmd/google-chat-cli@latest
 ```
 
 ### Quick Start

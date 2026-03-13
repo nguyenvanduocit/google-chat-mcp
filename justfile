@@ -6,7 +6,7 @@ build:
 
 # Build the CLI binary
 build-cli:
-    go build -o bin/google-chat-cli ./cmd/cli/
+    go build -o bin/google-chat-cli ./cmd/google-chat-cli/
 
 # Install the MCP server to $GOPATH/bin
 install:
@@ -14,7 +14,7 @@ install:
 
 # Install the CLI binary to $GOPATH/bin
 install-cli:
-    go install ./cmd/cli/
+    go install ./cmd/google-chat-cli/
 
 # Run tests
 test:
