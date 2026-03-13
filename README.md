@@ -199,3 +199,4 @@ MIT
 ```bash
 brew install nguyenvanduocit/tap/google-chat-mcp
 ```
+fix: trigger release processing after PR creation permission fix
