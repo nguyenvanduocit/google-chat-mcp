@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/nguyenvanduocit/google-chat-mcp/compare/v1.0.0...v1.0.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* trigger release after enabling PR creation permissions ([2ccd72e](https://github.com/nguyenvanduocit/google-chat-mcp/commit/2ccd72ebafd51a9244e966a3a03e9d76b76869e7))
+
 ## 1.0.0 (2026-03-13)
 
 
