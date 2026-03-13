@@ -88,3 +88,4 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+# Trigger workflow
