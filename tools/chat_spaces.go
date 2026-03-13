@@ -35,7 +35,10 @@ func RegisterSpacesTool(s *server.MCPServer) {
 }
 
 func listSpacesHandler(ctx context.Context, request mcp.CallToolRequest, input ListSpacesInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	pageSize := input.PageSize
 	if pageSize <= 0 {
@@ -77,7 +80,10 @@ func listSpacesHandler(ctx context.Context, request mcp.CallToolRequest, input L
 }
 
 func getSpaceHandler(ctx context.Context, request mcp.CallToolRequest, input GetSpaceInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	space, err := service.Spaces.Get(input.SpaceName).Context(ctx).Do()
 	if err != nil {

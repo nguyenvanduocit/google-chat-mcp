@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/mark3labs/mcp-go v0.41.1
+	github.com/mark3labs/mcp-go v0.44.1
 	golang.org/x/oauth2 v0.24.0
 	google.golang.org/api v0.209.0
 )

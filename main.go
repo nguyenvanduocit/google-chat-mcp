@@ -11,15 +11,17 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/nguyenvanduocit/google-chat-mcp/auth"
+	"github.com/nguyenvanduocit/google-chat-mcp/services"
 	"github.com/nguyenvanduocit/google-chat-mcp/tools"
 )
 
 func main() {
 	envFile := flag.String("env", "", "Path to environment file (optional when environment variables are set directly)")
-	httpPort := flag.String("http_port", "", "Port for HTTP server. If not provided, will use stdio")
+	httpPort := flag.String("http_port", "3003", "Port for HTTP server")
+	sessionDir := flag.String("session_dir", "data/sessions", "Directory for storing user sessions")
 	flag.Parse()
 
-	// Load environment file if specified
 	if *envFile != "" {
 		if err := godotenv.Load(*envFile); err != nil {
 			fmt.Printf("Warning: Error loading env file %s: %v\n", *envFile, err)
@@ -28,31 +30,16 @@ func main() {
 		}
 	}
 
-	// Check required environment variables
-	requiredEnvs := []string{"GOOGLE_CREDENTIALS_FILE", "GOOGLE_TOKEN_FILE"}
-	missingEnvs := []string{}
-	for _, env := range requiredEnvs {
-		if os.Getenv(env) == "" {
-			missingEnvs = append(missingEnvs, env)
-		}
-	}
-
-	if len(missingEnvs) > 0 {
-		fmt.Println("Configuration Error: Missing required environment variables")
-		fmt.Println()
-		fmt.Println("Missing variables:")
-		for _, env := range missingEnvs {
-			fmt.Printf("  - %s\n", env)
-		}
+	credentialsFile := os.Getenv("GOOGLE_CREDENTIALS_FILE")
+	if credentialsFile == "" {
+		fmt.Println("Configuration Error: GOOGLE_CREDENTIALS_FILE is required")
 		fmt.Println()
 		fmt.Println("Setup Instructions:")
 		fmt.Println("1. Create OAuth credentials in Google Cloud Console")
 		fmt.Println("2. Enable the Google Chat API for your project")
-		fmt.Println("3. Run the get-google-token script to generate token")
-		fmt.Println("4. Set the environment variables:")
+		fmt.Println("3. Set the environment variable:")
 		fmt.Println()
 		fmt.Println("   GOOGLE_CREDENTIALS_FILE=/path/to/google-credentials.json")
-		fmt.Println("   GOOGLE_TOKEN_FILE=/path/to/google-token.json")
 		fmt.Println()
 		os.Exit(1)
 	}
@@ -64,38 +51,34 @@ func main() {
 		server.WithRecovery(),
 	)
 
-	// Register all Google Chat tools
 	tools.RegisterSpacesTool(mcpServer)
 	tools.RegisterMessagesTool(mcpServer)
 	tools.RegisterMembersTool(mcpServer)
 
-	if *httpPort != "" {
-		fmt.Println()
-		fmt.Println("Starting Google Chat MCP Server in HTTP mode...")
-		fmt.Printf("Server will be available at: http://localhost:%s/mcp\n", *httpPort)
-		fmt.Println()
-		fmt.Println("Configuration:")
-		fmt.Println("Add the following to your MCP settings:")
-		fmt.Println()
-		fmt.Println("```json")
-		fmt.Println("{")
-		fmt.Println("  \"mcpServers\": {")
-		fmt.Println("    \"google-chat\": {")
-		fmt.Printf("      \"url\": \"http://localhost:%s/mcp\"\n", *httpPort)
-		fmt.Println("    }")
-		fmt.Println("  }")
-		fmt.Println("}")
-		fmt.Println("```")
-		fmt.Println()
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://localhost:%s", *httpPort)
+	}
 
-		httpServer := server.NewStreamableHTTPServer(mcpServer, server.WithEndpointPath("/mcp"))
-		if err := httpServer.Start(fmt.Sprintf(":%s", *httpPort)); err != nil && !isContextCanceled(err) {
-			log.Fatalf("Server error: %v", err)
-		}
-	} else {
-		if err := server.ServeStdio(mcpServer); err != nil && !isContextCanceled(err) {
-			log.Fatalf("Server error: %v", err)
-		}
+	authServer, err := auth.NewServer(mcpServer, auth.Config{
+		CredentialsFile: credentialsFile,
+		Scopes:          services.ListChatScopes(),
+		SessionDir:      *sessionDir,
+		BaseURL:         baseURL,
+	})
+	if err != nil {
+		log.Fatalf("Failed to create auth server: %v", err)
+	}
+
+	fmt.Println()
+	fmt.Println("Starting Google Chat MCP Server...")
+	fmt.Printf("MCP endpoint: %s/mcp\n", baseURL)
+	fmt.Printf("OAuth authorize: %s/authorize\n", baseURL)
+	fmt.Printf("Session storage: %s\n", *sessionDir)
+	fmt.Println()
+
+	if err := authServer.Start(fmt.Sprintf(":%s", *httpPort)); err != nil && !isContextCanceled(err) {
+		log.Fatalf("Server error: %v", err)
 	}
 }
 

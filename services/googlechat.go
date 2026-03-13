@@ -3,32 +3,18 @@ package services
 import (
 	"context"
 	"fmt"
-	"os"
-	"sync"
 
+	"github.com/nguyenvanduocit/google-chat-mcp/auth"
 	"google.golang.org/api/chat/v1"
 	"google.golang.org/api/option"
 )
 
-var ChatService = sync.OnceValue(func() *chat.Service {
-	ctx := context.Background()
-
-	credentialsFile := os.Getenv("GOOGLE_CREDENTIALS_FILE")
-	if credentialsFile == "" {
-		panic("GOOGLE_CREDENTIALS_FILE environment variable must be set")
+// ChatServiceFromContext creates a per-user Chat service from the authenticated HTTP client in context.
+func ChatServiceFromContext(ctx context.Context) (*chat.Service, error) {
+	client := auth.HTTPClientFromContext(ctx)
+	if client == nil {
+		return nil, fmt.Errorf("no authenticated HTTP client in context — user must authenticate first")
 	}
 
-	tokenFile := os.Getenv("GOOGLE_TOKEN_FILE")
-	if tokenFile == "" {
-		panic("GOOGLE_TOKEN_FILE environment variable must be set")
-	}
-
-	client := GoogleHttpClient(tokenFile, credentialsFile)
-
-	service, err := chat.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		panic(fmt.Sprintf("Failed to create Google Chat service: %v", err))
-	}
-
-	return service
-})
+	return chat.NewService(ctx, option.WithHTTPClient(client))
+}

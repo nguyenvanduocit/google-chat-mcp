@@ -132,6 +132,62 @@ Add to your MCP settings:
 - `google_chat_list_members` - List members of a space
 - `google_chat_get_member` - Get details of a specific member
 
+## CLI Usage
+
+In addition to the MCP server, `google-chat-mcp` ships a standalone CLI binary (`google-chat-cli`) for direct terminal use — no MCP client needed.
+
+### Installation
+
+```bash
+just install-cli
+# or
+go install github.com/nguyenvanduocit/google-chat-mcp/cmd/cli@latest
+```
+
+### Quick Start
+
+```bash
+export GOOGLE_CREDENTIALS_FILE=/path/to/credentials.json
+export GOOGLE_TOKEN_FILE=/path/to/token.json
+# or
+google-chat-cli --env .env <command> [flags]
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `list-spaces` | List Google Chat spaces |
+| `get-space` | Get space details |
+| `list-messages` | List messages in a space |
+| `get-message` | Get a specific message |
+| `send-message` | Send a message to a space |
+| `delete-message` | Delete a message |
+| `list-members` | List space members |
+| `get-member` | Get member details |
+
+### Examples
+
+```bash
+# List spaces
+google-chat-cli list-spaces
+
+# Send a message
+google-chat-cli send-message --space spaces/XXXXXX --text "Hello from CLI!"
+
+# List messages
+google-chat-cli list-messages --space spaces/XXXXXX
+
+# JSON output
+google-chat-cli list-spaces --output json | jq '.[].name'
+```
+
+### Flags
+
+Every command accepts:
+- `--env string` — Path to `.env` file
+- `--output string` — Output format: `text` (default) or `json`
+
 ## License
 
 MIT

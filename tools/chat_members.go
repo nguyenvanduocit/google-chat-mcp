@@ -37,7 +37,10 @@ func RegisterMembersTool(s *server.MCPServer) {
 }
 
 func listMembersHandler(ctx context.Context, request mcp.CallToolRequest, input ListMembersInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	pageSize := input.PageSize
 	if pageSize <= 0 {
@@ -81,7 +84,10 @@ func listMembersHandler(ctx context.Context, request mcp.CallToolRequest, input 
 }
 
 func getMemberHandler(ctx context.Context, request mcp.CallToolRequest, input GetMemberInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	member, err := service.Spaces.Members.Get(input.MemberName).Context(ctx).Do()
 	if err != nil {

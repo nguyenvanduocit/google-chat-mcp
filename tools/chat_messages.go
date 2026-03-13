@@ -80,7 +80,10 @@ func RegisterMessagesTool(s *server.MCPServer) {
 }
 
 func listMessagesHandler(ctx context.Context, request mcp.CallToolRequest, input ListMessagesInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	pageSize := input.PageSize
 	if pageSize <= 0 {
@@ -119,7 +122,10 @@ func listMessagesHandler(ctx context.Context, request mcp.CallToolRequest, input
 }
 
 func getMessageHandler(ctx context.Context, request mcp.CallToolRequest, input GetMessageInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	msg, err := service.Spaces.Messages.Get(input.MessageName).Context(ctx).Do()
 	if err != nil {
@@ -130,7 +136,10 @@ func getMessageHandler(ctx context.Context, request mcp.CallToolRequest, input G
 }
 
 func sendMessageHandler(ctx context.Context, request mcp.CallToolRequest, input SendMessageInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	message := &chat.Message{
 		Text: input.Text,
@@ -155,9 +164,12 @@ func sendMessageHandler(ctx context.Context, request mcp.CallToolRequest, input 
 }
 
 func deleteMessageHandler(ctx context.Context, request mcp.CallToolRequest, input DeleteMessageInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
-	_, err := service.Spaces.Messages.Delete(input.MessageName).Context(ctx).Do()
+	_, err = service.Spaces.Messages.Delete(input.MessageName).Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete message: %v", err)
 	}
@@ -166,14 +178,17 @@ func deleteMessageHandler(ctx context.Context, request mcp.CallToolRequest, inpu
 }
 
 func uploadAttachmentHandler(ctx context.Context, request mcp.CallToolRequest, input UploadAttachmentInput) (*mcp.CallToolResult, error) {
-	service := services.ChatService()
+	service, err := services.ChatServiceFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get chat service: %v", err)
+	}
 
 	// Open the file
 	file, err := os.Open(input.FilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Get file info for the filename
 	filename := filepath.Base(input.FilePath)
